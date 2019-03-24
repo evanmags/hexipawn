@@ -1,3 +1,34 @@
+control flow:
+  game starts:
+    - welcome player
+    - create board
+    - explain move structure
+    - beginplay:
+      - set up to player, round += 1
+      - ask player which piece to move
+        - varify piece is theirs, ask again if not
+      - ask where to move piece
+        - varify validity, ask again if not
+      - move piece
+        - change board
+        - create move dictionary
+        - check result of move
+        - update library
+      - set up to computer, round += 1
+      - select move
+        - generate possible moves
+        - check library for result of each move
+        - create 'options' list of non loss moves
+        - randomly pick move
+      - move piece (see above)
+      - loop to beginning
+      
+      - if at any point the result generates win or loss, end game.
+      - display winner
+      
+      - save library
+
+
 # end game conditions:
   # i moved and caused other player to not be able to move = i win
   # i reached row 3 before my opponent = i win
