@@ -1,5 +1,9 @@
 import random
-from library import *
+from memory import *
+
+working_memory = []
+
+
 # piece class, stores location and type data
 class piece():
   def __init__(self, sym, location):
@@ -44,6 +48,7 @@ class game_state:
       x += 1
   # move a piece in the board
   def move(self, p, to):
+    working_memory.append([self.rnd, [p.at, to]])
     board = list(self.board)
     board[p.at] = None
     p.at = to
@@ -171,7 +176,7 @@ def game_not_over(board, up, notup):
 # safe function for the library (write to file)
 def save(lib):
   file = open('library.py', 'w+')
-  file.write(f"library = {library}")
+  file.write(f"library = {memory}")
   file.close()
 
 # update working library (ie current memory)
@@ -253,6 +258,22 @@ def check_replay():
     print("thanks for playing!")
     return
 
+def save_memory(ltm, stm):
+  for move in stm:
+    if f"{move[0]}" in ltm:
+      contains = False
+      for mmove in ltm[f"{move[0]}"]:
+        if mmove["move"] == move[1]:
+          mmove["score"] += 1;
+          contains = True  
+      if contains == False:    
+        ltm[f"{move[0]}"].append({"move":move[1], "score": 0})
+
+  file = open('memory.py', 'w+')
+  file.write(f"memory = {memory}")
+  file.close()
+
+
 # main game
 def game():
   game = init_game()
@@ -267,16 +288,17 @@ def game():
     if not game_not_over(game.board, "C", "P")['bool']:
       print(f"The Winner is {game_not_over(game.board, 'C', 'P')['winner']}")
       break
-
+    print(working_memory)
+    save_memory(memory, working_memory)
     #computer moves
     game = computer_move(game)
     game.print_board()
-
+    print(working_memory)
     # check if moev ended game
     if not game_not_over(game.board, "P", "C")['bool']:
       print(f"The Winner is {game_not_over(game.board, 'P', 'C')['winner']}")
       break
-  
+  save_memory(memory, working_memory)
   return check_replay()
 
 game()
