@@ -3,6 +3,32 @@ from memory import *
 
 working_memory = []
 
+def main():
+  game = init_game()
+
+  while True:
+    # player moves
+    game = get_player_piece(game)
+    game.print_board()
+    print("\n" + ("#" * 15) + "\n")
+    
+    # check if move ended game
+    over = game_not_over(game.board, "P", "C")
+    if not over['bool']:
+      print(f"The Winner is {over['winner']}")
+      break
+
+    #computer moves
+    game = computer_move(game)
+    game.print_board()
+    # check if moev ended game
+    over = game_not_over(game.board, "P", "C")
+    if not over['bool']:
+      print(f"The Winner is {over['winner']}")
+      break
+
+  save_memory(memory, working_memory, over)
+  return check_replay()
 
 # piece class, stores location and type data
 class piece():
@@ -21,14 +47,13 @@ class game_state:
   @classmethod
   # generate a new game
   def new(self):
-    pieces = ["C", "P"]
     board = [None] * 9
-    i = 0;
+    i = 0
     while i < 3:
       board[i] = piece("C", i)
       board[i + 6] = piece("P", i + 6)
       i += 1
-    return game_state(board, 0);
+    return game_state(board, 0)
 
   # print the game board
   def print_board(self):
@@ -96,7 +121,6 @@ def is_diagonal_right(board, position, you):
 # AND checking for game wins
 # returns a list of possible moves for any player
 def check_possible_moves(board, up, notup):
-  index = 0
   moves = []
   for cell in board:
     if cell != None and cell.sym == up:
@@ -123,7 +147,7 @@ def check_possible_moves(board, up, notup):
 
         if is_diagonal_left(board, position, up):  # prevent jumping
             moves.append([cell.at, position - 4])
-  return(moves);
+  return(moves)
 
 # the random brain for initial play with no librabry to reference.
 def choose_move(moves):
@@ -133,29 +157,25 @@ def choose_move(moves):
 
 
 def player_crossed_board(board):
-  if board[0] == "P" or board[1] == "P" or board[2] == "P":
+  if board[0] != None and board[0].sym == "P":
+    return True
+  elif board[1] != None and board[1].sym == "P":
+    return True
+  elif board[2] != None and  board[2].sym == "P":
     return True
   return False
 
 def computer_crossed_board(board):
-  if board[6] == "C" or board[7] == "C" or board[8] == "C":
+  if board[6] != None and board[6].sym == "C":
+    return True
+  elif board[7] != None and board[7].sym == "C":
+    return True
+  elif board[8] != None and  board[8].sym == "C":
     return True
   return False
 # uses check possible moves to determine if the player who is up can play 
 # OR if the last player just won
 def game_not_over(board, up, notup):
-  if len(check_possible_moves(board, up, notup)) == 0:
-    return {
-      'bool': False,
-      'winner': notup
-    }
-
-  if len(check_possible_moves(board, notup, up)) == 0:
-    return {
-      'bool': False,
-      'winner': up
-    }
-  
   if player_crossed_board(board):
     return {
       'bool': False,
@@ -166,6 +186,18 @@ def game_not_over(board, up, notup):
     return {
       'bool': False,
       'winner': "C"
+    }
+
+  if len(check_possible_moves(board, up, notup)) == 0:
+    return {
+      'bool': False,
+      'winner': notup
+    }
+
+  if len(check_possible_moves(board, notup, up)) == 0:
+    return {
+      'bool': False,
+      'winner': up
     }
 
   return {
@@ -214,7 +246,7 @@ def get_player_piece(state):
     print("Your move: please select a piece (row/col)")
     select = sanitized_input()
     if valid_select(select, state.board, "P"):
-      break;
+      break
     else:
       print("You do not have a piece at that location.")
   return get_player_move(select, state)
@@ -227,7 +259,6 @@ def get_player_move(at, state):
     if [at, move] in moves:
       p = state.board[at]
       return game_state.move(state, p, move)
-      break
     else:
       print("That is not a valid move.")
   
@@ -246,25 +277,37 @@ def valid_select(selected, pieces, you):
 
 def computer_move(game):
     comp_moves = check_possible_moves(game.board, "C", "P")
+    print(comp_moves)
+    for move in memory[f"{game.rnd}"]:
+      if move['move'] in comp_moves:
+        for i in range(move['score']):
+          comp_moves.append(move[move])
+  
+    print(comp_moves)
     ch = choose_move(comp_moves)
     piece = game.board[ch[0]]
     return game.move(piece, ch[1])
 
 def check_replay():
   if input("Would you like to play again?") == "Y":
-    return game()
+    return main()
   
   else:
     print("thanks for playing!")
     return
 
-def save_memory(ltm, stm):
+def save_memory(ltm, stm, state):
   for move in stm:
     if f"{move[0]}" in ltm:
       contains = False
       for mmove in ltm[f"{move[0]}"]:
         if mmove["move"] == move[1]:
-          mmove["score"] += 1;
+          if state['winner'] == "C":
+            mmove["score"] += 1
+          elif state['winner'] == "P":
+            pass
+          else:
+            mmove["score"] += .5
           contains = True  
       if contains == False:    
         ltm[f"{move[0]}"].append({"move":move[1], "score": 0})
@@ -273,32 +316,5 @@ def save_memory(ltm, stm):
   file.write(f"memory = {memory}")
   file.close()
 
-
-# main game
-def game():
-  game = init_game()
-
-  while True:
-    # player moves
-    game = get_player_piece(game)
-    game.print_board()
-    print("\n" + ("#" * 15) + "\n")
-    
-    # check if move ended game
-    if not game_not_over(game.board, "C", "P")['bool']:
-      print(f"The Winner is {game_not_over(game.board, 'C', 'P')['winner']}")
-      break
-    print(working_memory)
-    save_memory(memory, working_memory)
-    #computer moves
-    game = computer_move(game)
-    game.print_board()
-    print(working_memory)
-    # check if moev ended game
-    if not game_not_over(game.board, "P", "C")['bool']:
-      print(f"The Winner is {game_not_over(game.board, 'P', 'C')['winner']}")
-      break
-  save_memory(memory, working_memory)
-  return check_replay()
-
-game()
+if __name__ == "__main__":
+  main()
