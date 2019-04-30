@@ -1,5 +1,6 @@
 import random
-from memory import *
+from modules.piece import Piece 
+from modules.memory import memory
 
 working_memory = []
 
@@ -30,13 +31,6 @@ def main():
   save_memory(memory, working_memory, over)
   return check_replay()
 
-# piece class, stores location and type data
-class piece():
-  def __init__(self, sym, location):
-    self.sym = sym
-    self.at = location
-
-
 # game state stores board data,
 # has creation metods to print its state, move a piece, and build a new game;
 class game_state:
@@ -50,8 +44,8 @@ class game_state:
     board = [None] * 9
     i = 0
     while i < 3:
-      board[i] = piece("C", i)
-      board[i + 6] = piece("P", i + 6)
+      board[i] = Piece("C", i)
+      board[i + 6] = Piece("P", i + 6)
       i += 1
     return game_state(board, 0)
 
@@ -61,7 +55,7 @@ class game_state:
     row_str = ''
     for piece in self.board:
       if piece != None:
-        piece = piece.sym
+        piece = piece.symbol
       if x % 3 != 0:
         row_str += f" {piece or ' '} |"
       else:
@@ -93,13 +87,13 @@ def is_directly_ahead(board, position, you):
 def is_diagonal_left(board, position, you):
   if you == "C":
     if position + 2 < 9:
-      if board[position + 2] != None and board[position + 2].sym == "P":
+      if board[position + 2] != None and board[position + 2].symbol == "P":
         if position != 0 and position != 3 and position != 6: # prevent jumping
           return True
 
   if you == "P":
     if position - 4 >= 0:
-      if board[position - 4] != None and board[position - 4].sym == "C":
+      if board[position - 4] != None and board[position - 4].symbol == "C":
         if position != 6:  # prevent jumping
           return True
   return False
@@ -107,13 +101,13 @@ def is_diagonal_left(board, position, you):
 def is_diagonal_right(board, position, you):
   if you == "C":
     if position + 4 < 9:
-      if board[position + 4] != None and board[position + 4].sym == "P":
+      if board[position + 4] != None and board[position + 4].symbol == "P":
         if position != 2: # prevent jumping
           return True
 
   if you == "P":
     if position - 2 >=0:
-      if board[position - 2] != None and board[position - 2].sym == "C":
+      if board[position - 2] != None and board[position - 2].symbol == "C":
         if position != 2 and position != 5 and position != 8: # prevent jumping
           return True
   return False
@@ -123,7 +117,7 @@ def is_diagonal_right(board, position, you):
 def check_possible_moves(board, up, notup):
   moves = []
   for cell in board:
-    if cell != None and cell.sym == up:
+    if cell != None and cell.symbol == up:
       position = cell.at
       if up == "C":
         # moving one square ahead
@@ -157,20 +151,20 @@ def choose_move(moves):
 
 
 def player_crossed_board(board):
-  if board[0] != None and board[0].sym == "P":
+  if board[0] != None and board[0].symbol == "P":
     return True
-  elif board[1] != None and board[1].sym == "P":
+  elif board[1] != None and board[1].symbol == "P":
     return True
-  elif board[2] != None and  board[2].sym == "P":
+  elif board[2] != None and  board[2].symbol == "P":
     return True
   return False
 
 def computer_crossed_board(board):
-  if board[6] != None and board[6].sym == "C":
+  if board[6] != None and board[6].symbol == "C":
     return True
-  elif board[7] != None and board[7].sym == "C":
+  elif board[7] != None and board[7].symbol == "C":
     return True
-  elif board[8] != None and  board[8].sym == "C":
+  elif board[8] != None and  board[8].symbol == "C":
     return True
   return False
 # uses check possible moves to determine if the player who is up can play 
@@ -217,26 +211,26 @@ def update_library():
 
 def init_game():
   game = game_state.new()
-  # print("\nWELCOME TO HEXIPAWN\n")
-  # print("Below you will see a board, when selecting pieces and moves\nuse the numbers in each square to select them.")
-  # print(f" 1 | 2 | 3 ")
-  # print(f"-----------")
-  # print(f" 4 | 5 | 6 ")
-  # print(f"-----------")
-  # print(f" 7 | 8 | 9 \n")
+  print("\nWELCOME TO HEXIPAWN\n")
+  print("Below you will see a board, when selecting pieces and moves\nuse the numbers in each square to select them.")
+  print(f" 1 | 2 | 3 ")
+  print(f"-----------")
+  print(f" 4 | 5 | 6 ")
+  print(f"-----------")
+  print(f" 7 | 8 | 9 \n")
 
-  # print("RULES:\t1. You can only move one space at a time.")
-  # print("\t2. You can only move diagonal to capture a piece.")
-  # print("\t3. To win you can either reach the opposite side.")
-  # print("\t   of the board, capture all of your players pieces,")
-  # print("\t   pieces, or cause your opponent to no longer have")    
-  # print("\t   any valid moves.\n")    
+  print("RULES:\t1. You can only move one space at a time.")
+  print("\t2. You can only move diagonal to capture a piece.")
+  print("\t3. To win you can either reach the opposite side.")
+  print("\t   of the board, capture all of your players pieces,")
+  print("\t   pieces, or cause your opponent to no longer have")    
+  print("\t   any valid moves.\n")    
 
 
-  # print("ENJOY!!\n")
+  print("ENJOY!!\n")
   
-  # if (input("Type Y to play or N to quit: ") == "N"):
-  #   return;
+  if (input("Type Y to play or N to quit: ") == "N"):
+    return
 
   game.print_board()
   return game
@@ -271,7 +265,7 @@ def sanitized_input():
     return select
 
 def valid_select(selected, pieces, you):
-  if pieces[selected].sym == you:
+  if pieces[selected].symbol == you:
       return True
   return False
 
@@ -282,6 +276,7 @@ def computer_move(game):
       if move['move'] in comp_moves:
         for i in range(move['score']):
           comp_moves.append(move[move])
+          i
   
     print(comp_moves)
     ch = choose_move(comp_moves)
