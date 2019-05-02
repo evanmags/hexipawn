@@ -1,12 +1,16 @@
 import random
-from modules.piece import Piece 
+from modules.piece import Piece
+from modules.computer import Computer
+from modules.game_state import Game_State
 from modules.memory import memory
+from modules.moves import check_possible_moves
+
 
 working_memory = []
 
 def main():
   game = init_game()
-
+  computer = Computer()
   while True:
     # player moves
     game = get_player_piece(game)
@@ -20,7 +24,7 @@ def main():
       break
 
     #computer moves
-    game = computer_move(game)
+    computer.move(game)
     game.print_board()
     # check if moev ended game
     over = game_not_over(game.board, "P", "C")
@@ -33,121 +37,12 @@ def main():
 
 # game state stores board data,
 # has creation metods to print its state, move a piece, and build a new game;
-class game_state:
-  def __init__(self, board, rnd):
-    self.board = board
-    self.rnd = rnd or 0
 
-  @classmethod
-  # generate a new game
-  def new(self):
-    board = [None] * 9
-    i = 0
-    while i < 3:
-      board[i] = Piece("C", i)
-      board[i + 6] = Piece("P", i + 6)
-      i += 1
-    return game_state(board, 0)
 
-  # print the game board
-  def print_board(self):
-    x = 1
-    row_str = ''
-    for piece in self.board:
-      if piece != None:
-        piece = piece.symbol
-      if x % 3 != 0:
-        row_str += f" {piece or ' '} |"
-      else:
-        row_str += f" {piece  or ' '} "
-        print(row_str)
-        row_str = ''
-        if(x < 7):
-          print("-"*11)
-      x += 1
-  # move a piece in the board
-  def move(self, p, to):
-    working_memory.append([self.rnd, [p.at, to]])
-    board = list(self.board)
-    board[p.at] = None
-    p.at = to
-    board[to] = p
-    rnd = self.rnd + 1
-    return game_state(board, rnd)
 
-def is_directly_ahead(board, position, you):
-  if you == "C":
-    if position + 3 < 9 and board[position + 3] == None:
-      return True
-  if you == "P":
-    if position - 3 >= 0 and board[position - 3] == None:
-      return True
-  return False
-
-def is_diagonal_left(board, position, you):
-  if you == "C":
-    if position + 2 < 9:
-      if board[position + 2] != None and board[position + 2].symbol == "P":
-        if position != 0 and position != 3 and position != 6: # prevent jumping
-          return True
-
-  if you == "P":
-    if position - 4 >= 0:
-      if board[position - 4] != None and board[position - 4].symbol == "C":
-        if position != 6:  # prevent jumping
-          return True
-  return False
-
-def is_diagonal_right(board, position, you):
-  if you == "C":
-    if position + 4 < 9:
-      if board[position + 4] != None and board[position + 4].symbol == "P":
-        if position != 2: # prevent jumping
-          return True
-
-  if you == "P":
-    if position - 2 >=0:
-      if board[position - 2] != None and board[position - 2].symbol == "C":
-        if position != 2 and position != 5 and position != 8: # prevent jumping
-          return True
-  return False
-# used for both ceckign possible moved for the computer 
-# AND checking for game wins
-# returns a list of possible moves for any player
-def check_possible_moves(board, up, notup):
-  moves = []
-  for cell in board:
-    if cell != None and cell.symbol == up:
-      position = cell.at
-      if up == "C":
-        # moving one square ahead
-        if is_directly_ahead(board, position, up):
-          moves.append([cell.at, position + 3])
-
-        # moving diagonally
-        if is_diagonal_left(board, position, up): # prevent jumping
-            moves.append([cell.at, position + 2])
-
-        if is_diagonal_right(board, position, up):  # prevent jumping
-              moves.append([cell.at, position + 4])
-
-      if up == "P":
-        # moving one square ahead
-        if is_directly_ahead(board, position, up):
-          moves.append([cell.at, position - 3])
-        # moving diagonally
-        if is_diagonal_right(board, position, up):  # prevent jumping
-            moves.append([cell.at, position - 2])
-
-        if is_diagonal_left(board, position, up):  # prevent jumping
-            moves.append([cell.at, position - 4])
-  return(moves)
 
 # the random brain for initial play with no librabry to reference.
-def choose_move(moves):
-  # getting passed [[row, col], #, #]
-  piece = random.randint(0, len(moves) - 1)
-  return moves[piece]
+
 
 
 def player_crossed_board(board):
@@ -210,7 +105,7 @@ def update_library():
   pass
 
 def init_game():
-  game = game_state.new()
+  game = Game_State.new()
   print("\nWELCOME TO HEXIPAWN\n")
   print("Below you will see a board, when selecting pieces and moves\nuse the numbers in each square to select them.")
   print(f" 1 | 2 | 3 ")
@@ -252,11 +147,10 @@ def get_player_move(at, state):
     move = sanitized_input()
     if [at, move] in moves:
       p = state.board[at]
-      return game_state.move(state, p, move)
+      return Game_State.move(state, p, move)
     else:
       print("That is not a valid move.")
   
-
 def sanitized_input():
     select = int(input(">>> ")) - 1
     if select > 8 or select < 0:
@@ -269,19 +163,6 @@ def valid_select(selected, pieces, you):
       return True
   return False
 
-def computer_move(game):
-    comp_moves = check_possible_moves(game.board, "C", "P")
-    print(comp_moves)
-    for move in memory[f"{game.rnd}"]:
-      if move['move'] in comp_moves:
-        for i in range(move['score']):
-          comp_moves.append(move[move])
-          i
-  
-    print(comp_moves)
-    ch = choose_move(comp_moves)
-    piece = game.board[ch[0]]
-    return game.move(piece, ch[1])
 
 def check_replay():
   if input("Would you like to play again?") == "Y":

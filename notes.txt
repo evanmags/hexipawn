@@ -93,3 +93,6 @@ on every move:
               ---access: _upper_['result']
           } 
         }
+
+# todo
+  - code refactor and useage of classes.
