@@ -1,4 +1,5 @@
 import random
+from modules.memory import memory
 from modules.moves import check_possible_moves
 
 class Computer:
@@ -9,7 +10,7 @@ class Computer:
 
   def move(self, state):
     moves = check_possible_moves(state.board, "C", "P")
-    for move in state.memory[f"{state.rnd}"]:
+    for move in memory[f"{state.rnd}"]:
       if move['move'] in moves:
         for i in range(move['score']):
           moves.append(move['move'])

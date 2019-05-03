@@ -1,10 +1,13 @@
 from modules.piece import Piece
+from modules.computer import Computer
 
 class Game_State:
   def __init__(self, board, rnd):
     self.board = board
     self.rnd = rnd or 0
     self.memory = []
+    self.computer = Computer()
+    self.player = Player()
 
   @classmethod
   def new(self):
@@ -37,7 +40,8 @@ class Game_State:
     self.memory.append([self.rnd, [p.at, to]])
     board = list(self.board)
     board[p.at] = None
-    p.at = to
-    board[to] = p
-    rnd = self.rnd + 1
-    return Game_State(board, rnd)
+    board[to] = Piece(p.symbol, to)
+    return Game_State(board, self.rnd + 1)
+  
+  def game_over(self):
+    pass

@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import random
 from modules.piece import Piece
 from modules.computer import Computer
@@ -10,7 +12,6 @@ working_memory = []
 
 def main():
   game = init_game()
-  computer = Computer()
   while True:
     # player moves
     game = get_player_piece(game)
@@ -24,7 +25,7 @@ def main():
       break
 
     #computer moves
-    computer.move(game)
+    game.computer.move(game)
     game.print_board()
     # check if moev ended game
     over = game_not_over(game.board, "P", "C")
