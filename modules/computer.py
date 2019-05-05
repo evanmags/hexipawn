@@ -4,7 +4,7 @@ from modules.moves import check_possible_moves
 
 class Computer:
   def __init__(self):
-    self.pieces = [6, 7, 8,]
+    self.pieces = [0, 1, 2]
 
   def move(self, state):
     moves = check_possible_moves(state.board, "C", "P")
@@ -23,4 +23,4 @@ class Computer:
     return moves[piece]
   
   def crossed_board(self):
-    return any(x in self.pieces for x in [0, 1, 2])
+    return any(x in self.pieces for x in [6, 7, 8])

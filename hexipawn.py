@@ -6,6 +6,8 @@ from modules.moves import check_possible_moves
 
 def main():
   game = init_game()
+  if game == None:
+    return
   game.print_board()
   
   while True:
@@ -49,10 +51,10 @@ def init_game():
 
   print("ENJOY!!\n")
   
-  if (input("Type Y to play or N to quit: ") == "N"):
-    return
-
-  return Game_State.new()
+  if (input("Type Y to play or N to quit: ").upper() == "N"):
+    return print("sorry to see you go.")
+  else:
+    return Game_State.new()
 
 def check_replay():
   if input("Would you like to play again?") == "Y":

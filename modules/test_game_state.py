@@ -10,3 +10,9 @@ def test_init():
 
 def test_over():
   assert game.over() == False
+
+def test_save_memory():
+  game.save_memory(game)
+  from modules.memory import memory
+  assert memory != None
+  assert type(memory) == dict

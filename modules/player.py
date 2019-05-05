@@ -2,10 +2,10 @@ from modules.moves import check_possible_moves
 
 class Player:
   def __init__(self):
-    self.pieces = [0, 1, 2]
+    self.pieces = [6, 7, 8]
 
   def move(self, state):
-    return self.get_player_move(state)
+    return self.get_player_piece(state)
 
   def get_player_piece(self, state):
     while True:
@@ -36,5 +36,5 @@ class Player:
     return select
   
   def crossed_board(self):
-    return any(x in self.pieces for x in [6, 7, 8])
+    return any(x in self.pieces for x in [0, 1, 2])
     
