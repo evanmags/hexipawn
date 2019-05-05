@@ -1,5 +1,7 @@
 from modules.piece import Piece
 from modules.computer import Computer
+from modules.player import Player
+from modules.memory import memory
 
 class Game_State:
   def __init__(self, board, rnd):
@@ -8,6 +10,7 @@ class Game_State:
     self.memory = []
     self.computer = Computer()
     self.player = Player()
+    self.winner = ''
 
   @classmethod
   def new(self):
@@ -43,5 +46,28 @@ class Game_State:
     board[to] = Piece(p.symbol, to)
     return Game_State(board, self.rnd + 1)
   
-  def game_over(self):
-    pass
+  def over(self):
+    if self.player.crossed_board() or self.computer.crossed_board():
+      return True
+    else:
+      return False
+
+  def save_memory(self, state):
+    for move in self.memory:
+      if f"{move[0]}" in memory:
+        contains = False
+        for mmove in memory[f"{move[0]}"]:
+          if mmove["move"] == move[1]:
+            if state['winner'] == "C":
+              mmove["score"] += 1
+            elif state['winner'] == "P":
+              pass
+            else:
+              mmove["score"] += .5
+            contains = True  
+        if contains == False:    
+          memory[f"{move[0]}"].append({"move":move[1], "score": 0})
+
+    file = open('memory.py', 'w+')
+    file.write(f"memory = {memory}")
+    file.close()
