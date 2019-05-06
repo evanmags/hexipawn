@@ -24,7 +24,7 @@ class Player:
       move = self.valid_sanitized_input()
       if [at, move] in moves:
         p = state.board[at]
-        return state.move(state, p, move)
+        return state.move(p, move)
       else:
         print("That is not a valid move.")
     

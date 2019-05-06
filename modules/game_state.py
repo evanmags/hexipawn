@@ -4,12 +4,11 @@ from modules.player import Player
 from modules.memory import memory
 
 class Game_State:
-  def __init__(self, board, rnd):
-    self.board = board
-    self.rnd = rnd or 0
-    self.memory = []
-    self.computer = Computer()
-    self.player = Player()
+  def __init__(self, memory=[], oldState=None):
+    self.rnd = oldState.rnd + 1 if oldState and oldState.rnd else 0
+    self.memory = memory
+    self.computer = oldState.computer if oldState and oldState.computer else Computer()
+    self.player = oldState.player if oldState and oldState.player else Player()
     self.winner = ''
 
   @classmethod
@@ -20,31 +19,27 @@ class Game_State:
       board[i] = Piece("C", i)
       board[i + 6] = Piece("P", i + 6)
       i += 1
-    return Game_State(board, 0)
+    return Game_State(board)
 
   # print the game board
   def print_board(self):
-    x = 1
-    row_str = ''
-    for piece in self.board:
-      if piece != None:
-        piece = piece.symbol
-      if x % 3 != 0:
-        row_str += f" {piece or ' '} |"
-      else:
-        row_str += f" {piece  or ' '} "
-        print(row_str)
-        row_str = ''
-        if(x < 7):
-          print("-"*11)
-      x += 1
+    for x in range(3):
+      row_str = ''
+      for y in range(3):
+        cell = y + (x * 3)
+        row_str += f" C " if cell in self.computer.pieces else f" P " if cell in self.player.pieces else '   '
+        row_str += f"|" if (cell + 1) % 3 != 0 else ''
+      print(row_str)
+      if x < 2:
+        print("-"*11)
+
   # move a piece in the board
   def move(self, p, to):
+    board = []
     self.memory.append([self.rnd, [p.at, to]])
-    board = list(self.board)
     board[p.at] = None
     board[to] = Piece(p.symbol, to)
-    return Game_State(board, self.rnd + 1)
+    return Game_State(board, self)
   
   def over(self):
     if self.player.crossed_board() or self.computer.crossed_board():
