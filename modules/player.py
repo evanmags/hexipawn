@@ -15,8 +15,12 @@ class Player:
     self.pieces.remove(at)
     self.pieces.append(to)
 
+    state.memory.append([at, to])
+
     if to in state.computer.pieces:
       state.computer.pieces.remove(to)
+
+    state.rnd += 1
 
   def get_player_piece(self, state) -> int:
     """

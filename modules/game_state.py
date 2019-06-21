@@ -3,11 +3,11 @@ from modules.player import Player
 from modules.memory import memory
 
 class GameState:
-  def __init__(self, memory=[], oldState=None):
-    self.rnd = (oldState.rnd + 1) if oldState else 0
-    self.memory = memory
-    self.computer = oldState.computer if oldState else Computer()
-    self.player = oldState.player if oldState else Player()
+  def __init__(self):
+    self.rnd = 0
+    self.memory = []
+    self.computer = Computer()
+    self.player = Player()
     self.winner = None
 
   def print_board(self):
@@ -34,32 +34,37 @@ class GameState:
       else:
         print("|", end="")
 
-  def over(self):
-    if self.player.crossed_board() or self.computer.has_moves(self) == None:
+  def over(self, justPlayed):
+    if not self.computer.has_moves(self) and not self.player.has_moves(self):
+      self.winner = justPlayed
+
+    if self.player.crossed_board() or not self.computer.has_moves(self):
       self.winner = 'P'
       return True
-    elif self.computer.crossed_board() or self.player.has_moves(self) == None:
+    elif self.computer.crossed_board() or not self.player.has_moves(self):
       self.winner = 'C'
       return True
     else: 
       return False
 
   def save_memory(self):
-    for move in self.memory:
-      if str(move[0]) in memory:
+    for rnd, move in enumerate(self.memory):
+      if rnd in memory:
         contains = False
-        for mmove in memory[f"{move[0]}"]:
-          if mmove["move"] == move[1]:
+        for saved in memory[rnd]:
+          if saved["move"] == move:
+            contains = True
             if self.winner == "C":
-              mmove["score"] += 1
+              saved['score'] += 1
             elif self.winner == "P":
               pass
             else:
-              mmove["score"] += .5
-            contains = True  
-        if contains == False:    
-          memory[f"{move[0]}"].append({"move":move[1], "score": 0})
+              saved["score"] += .5 
+        if not contains:    
+          memory[rnd].append({"move":move, "score": 0})
+      else:
+        memory[rnd] = [ {"move":move, "score": 0} ]
 
-    file = open('memory.py', 'w+')
-    file.write(f"memory = {memory}")
-    file.close()
+    with open('modules/memory.py', 'w+') as file:
+      file.write(f"memory = {memory}")
+      file.close()

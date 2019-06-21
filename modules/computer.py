@@ -12,22 +12,28 @@ class Computer:
     for piece in self.pieces:
       moves = self.piece_moves(state, piece)
       for move in moves:
-        all_moves.append((piece, move))
+        all_moves.append([piece, move])
     
-    # # add add moves from memory to adjust weighting
-    # for move in memory[f"{state.rnd}"]:
-    #   i = move['score']
-    #   while i > 0:
-    #     all_moves.append(move['move'])
-    #     i -= 1
+    # add add moves from memory to adjust weighting
+    if state.rnd in memory:
+      for move, score in memory[state.rnd]:
+        if move in all_moves:
+          i = score
+          while i > 0:
+            all_moves.append(move)
+            i -= 1
     
     # choose move from weighted list
     (at, to) = choice(all_moves)
     self.pieces.remove(at)
     self.pieces.append(to)
 
+    state.memory.append([at, to])
+
     if to in state.player.pieces:
       state.player.pieces.remove(to)
+    
+    state.rnd += 1
 
   def piece_moves(self, state, piece: int) -> List[int]:
     """

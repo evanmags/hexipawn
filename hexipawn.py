@@ -10,22 +10,22 @@ def main(skipInit=False):
   if game == None: return
   game.print_board()
   
-  while not game.over():
+  while not game.over("C"):
     # player moves
     game.player.move(game)
     game.print_board()
     print(("#" * 45) + "\n")
 
-    if game.over(): break
-
+    if game.over("P"): break
+    
     #computer moves
     game.computer.move(game)
     game.print_board()
     print(("#" * 45) + "\n")
 
   print(f"The Winner is {game.winner}")
-
   game.save_memory()
+
   return check_replay()
 
 def init_game(skip):
