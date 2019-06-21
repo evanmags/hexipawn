@@ -1,61 +1,58 @@
-from modules.piece import Piece
 from modules.computer import Computer
 from modules.player import Player
 from modules.memory import memory
 
-class Game_State:
+class GameState:
   def __init__(self, memory=[], oldState=None):
-    self.rnd = oldState.rnd + 1 if oldState and oldState.rnd else 0
+    self.rnd = (oldState.rnd + 1) if oldState else 0
     self.memory = memory
-    self.computer = oldState.computer if oldState and oldState.computer else Computer()
-    self.player = oldState.player if oldState and oldState.player else Player()
-    self.winner = ''
+    self.computer = oldState.computer if oldState else Computer()
+    self.player = oldState.player if oldState else Player()
+    self.winner = None
 
-  @classmethod
-  def new(self):
-    board = [None] * 9
-    i = 0
-    while i < 3:
-      board[i] = Piece("C", i)
-      board[i + 6] = Piece("P", i + 6)
-      i += 1
-    return Game_State(board)
-
-  # print the game board
   def print_board(self):
-    for x in range(3):
-      row_str = ''
-      for y in range(3):
-        cell = y + (x * 3)
-        row_str += f" C " if cell in self.computer.pieces else f" P " if cell in self.player.pieces else '   '
-        row_str += f"|" if (cell + 1) % 3 != 0 else ''
-      print(row_str)
-      if x < 2:
-        print("-"*11)
+    print()
 
-  # move a piece in the board
-  def move(self, p, to):
-    board = []
-    self.memory.append([self.rnd, [p.at, to]])
-    board[p.at] = None
-    board[to] = Piece(p.symbol, to)
-    return Game_State(board, self)
-  
+    for cell in range(9):
+      # start each row in the board
+      if cell in [0, 3, 6]:
+        print("\t\t", end="")
+      
+      # print piece in each box
+      if cell in self.computer.pieces:
+        print(" C ", end="")
+      elif cell in self.player.pieces:
+        print(" P ", end="")
+      else:
+        print("   ", end="")
+
+      # print row separators
+      if cell in [2, 5]:
+        print("\n\t\t", "-"*11, sep="")
+      elif cell == 8:
+        print("\n")
+      else:
+        print("|", end="")
+
   def over(self):
-    if self.player.crossed_board() or self.computer.crossed_board():
+    if self.player.crossed_board() or self.computer.has_moves(self) == None:
+      self.winner = 'P'
       return True
-    else:
+    elif self.computer.crossed_board() or self.player.has_moves(self) == None:
+      self.winner = 'C'
+      return True
+    else: 
       return False
 
-  def save_memory(self, state):
+  def save_memory(self):
     for move in self.memory:
-      if f"{move[0]}" in memory:
+      if str(move[0]) in memory:
         contains = False
         for mmove in memory[f"{move[0]}"]:
           if mmove["move"] == move[1]:
-            if state['winner'] == "C":
+            if self.winner == "C":
               mmove["score"] += 1
-            elif state['winner'] == "P":
+            elif self.winner == "P":
               pass
             else:
               mmove["score"] += .5

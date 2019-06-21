@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, NewType
 
 class Player:
   def __init__(self):
@@ -9,11 +9,14 @@ class Player:
     gets piece location and move location from user
     removes piece from pices and adds the new pieve location
     """
-    piece = self.get_player_piece(state)
-    moveTo = self.get_player_move(piece, state)
+    at = self.get_player_piece(state)
+    to = self.get_player_move(at, state)
+    
+    self.pieces.remove(at)
+    self.pieces.append(to)
 
-    self.pieces.remove(piece)
-    self.pieces.append(moveTo)
+    if to in state.computer.pieces:
+      state.computer.pieces.remove(to)
 
   def get_player_piece(self, state) -> int:
     """
@@ -40,7 +43,7 @@ class Player:
       print("Your move: please select a move (row/col)")
       move = self.valid_sanitized_input()
       if move in moves:
-        return [at, move]
+        return move
       else:
         print("That is not a valid move.")
   

@@ -1,38 +1,35 @@
 #!/usr/bin/env python3
+
 import re
 import os
-from modules.game_state import Game_State
+from modules.game_state import GameState
 from modules.memory import memory
-from modules.moves import check_possible_moves
 
 def main(skipInit=False):
   game = init_game(skipInit)
   if game == None: return
   game.print_board()
   
-  while True:
+  while not game.over():
     # player moves
     game.player.move(game)
     game.print_board()
-    print("\n" + ("#" * 15) + "\n")
+    print(("#" * 45) + "\n")
 
-    if game.over():
-      print(f"The Winner is {game.winner}")
-      break
+    if game.over(): break
 
     #computer moves
     game.computer.move(game)
     game.print_board()
+    print(("#" * 45) + "\n")
 
-    if game.over():
-      print(f"The Winner is {game.winner}")
-      break
+  print(f"The Winner is {game.winner}")
 
-  game.save_memory([])
+  game.save_memory()
   return check_replay()
 
 def init_game(skip):
-  if skip: return Game_State()
+  if skip: return GameState()
 
   os.system('clear')
 
@@ -55,7 +52,7 @@ def init_game(skip):
   print("ENJOY!!\n")
 
   if re.match("^(y|yes)$", input("Type Y to play or N to quit: "), flags=re.IGNORECASE):
-    return Game_State()
+    return GameState()
   else:
     return print("Sorry to see you go.")
 

@@ -1,26 +1,67 @@
-import random
+from typing import List
+from random import choice
 from modules.memory import memory
-from modules.moves import check_possible_moves
 
 class Computer:
   def __init__(self):
     self.pieces = [0, 1, 2]
 
   def move(self, state):
-    moves = check_possible_moves(state.board, "C", "P")
-    for move in memory[f"{state.rnd}"]:
-      if move['move'] in moves:
-        for i in range(move['score']):
-          moves.append(move['move'])
-          i
-    ch = self.choose_move(moves)
-    piece = state.board[ch[0]]
-    return state.move(piece, ch[1])
+    # generate all possible combinations
+    all_moves = []
+    for piece in self.pieces:
+      moves = self.piece_moves(state, piece)
+      for move in moves:
+        all_moves.append((piece, move))
+    
+    # # add add moves from memory to adjust weighting
+    # for move in memory[f"{state.rnd}"]:
+    #   i = move['score']
+    #   while i > 0:
+    #     all_moves.append(move['move'])
+    #     i -= 1
+    
+    # choose move from weighted list
+    (at, to) = choice(all_moves)
+    self.pieces.remove(at)
+    self.pieces.append(to)
 
-  def choose_move(self, moves):
-    # getting passed an array of moves and picking one
-    piece = random.randint(0, len(moves) - 1)
-    return moves[piece]
+    if to in state.player.pieces:
+      state.player.pieces.remove(to)
+
+  def piece_moves(self, state, piece: int) -> List[int]:
+    """
+    takes in a game state and a selected location of a piece
+    returns a list of integers representing result locations
+    """
+    pPieces = state.player.pieces
+    moves = []
+
+    # diagonal left
+    if piece in [0, 1, 3, 4] and (piece + 4) in pPieces:
+      moves.append(piece + 4)
+    # diagonal right
+    if piece in [1, 2, 3, 4] and (piece + 2) in pPieces:
+      moves.append(piece + 2)
+
+    # straight ahead
+    if piece not in [6, 7, 8] and (piece + 3) not in pPieces:
+      moves.append(piece + 3)
+      
+    return moves
   
+  def has_moves(self, state) -> bool:
+    """
+    accepts a GameState,
+    returns True iff any possible moves are found,
+      otherwise False
+    """
+    for piece in self.pieces:
+      moves = self.piece_moves(state, piece)
+      if len(moves) > 0:
+        return True
+
+    return False
+
   def crossed_board(self):
     return any(x in self.pieces for x in [6, 7, 8])
