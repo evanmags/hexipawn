@@ -15,10 +15,10 @@ class Player:
     self.pieces.remove(at)
     self.pieces.append(to)
 
-    state.memory.append([at, to])
-
     if to in state.computer.pieces:
       state.computer.pieces.remove(to)
+
+    state.memory.append(([at, to], self.pieces[:], state.computer.pieces[:]))
 
     state.rnd += 1
 

@@ -2,6 +2,7 @@
 
 import re
 import os
+import sqlite3
 from modules.game_state import GameState
 from modules.memory import memory
 
@@ -24,7 +25,8 @@ def main(skipInit=False):
     print(("#" * 45) + "\n")
 
   print(f"The Winner is {game.winner}")
-  game.save_memory()
+
+  game.save_memory(sqlite3.connect('hexipawn_memory.db'))
 
   return check_replay()
 

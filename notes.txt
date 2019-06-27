@@ -2,3 +2,8 @@
     to an SQLite database.
 
 -> tkinker frontend eventually
+
+-> database:
+    row:
+        ID          - From - To  - Player Pieces  - Comp Pieces
+        primary key   Int    Int   List[Int]->str   List[Int]->str

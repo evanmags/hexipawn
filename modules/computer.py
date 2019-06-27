@@ -28,11 +28,11 @@ class Computer:
     self.pieces.remove(at)
     self.pieces.append(to)
 
-    state.memory.append([at, to])
-
     if to in state.player.pieces:
       state.player.pieces.remove(to)
     
+    state.memory.append(([at, to], state.player.pieces[:], self.pieces[:]))
+
     state.rnd += 1
 
   def piece_moves(self, state, piece: int) -> List[int]:

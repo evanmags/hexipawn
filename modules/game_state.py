@@ -47,24 +47,18 @@ class GameState:
     else: 
       return False
 
-  def save_memory(self):
-    for rnd, move in enumerate(self.memory):
-      if rnd in memory:
-        contains = False
-        for saved in memory[rnd]:
-          if saved["move"] == move:
-            contains = True
-            if self.winner == "C":
-              saved['score'] += 1
-            elif self.winner == "P":
-              pass
-            else:
-              saved["score"] += .5 
-        if not contains:    
-          memory[rnd].append({"move":move, "score": 0})
-      else:
-        memory[rnd] = [ {"move":move, "score": 0} ]
+  def save_memory(self, connection):
+    db = connection.cursor()
+    
+    winLoss = 2 if self.winner == 'C' else 1
 
-    with open('modules/memory.py', 'w+') as file:
-      file.write(f"memory = {memory}")
-      file.close()
+    variables = []
+
+    for move, pPieces, cPieces in self.memory:
+      variables.append((move[0], move[1], str(pPieces), str(cPieces), winLoss))
+
+    db.executemany('''INSERT INTO memory ("from", "to", "player_pieces", "computer_pieces", "game_result")
+                  VALUES (?, ?, ?, ?, ?)''', variables)
+    
+    connection.commit()
+    connection.close()
