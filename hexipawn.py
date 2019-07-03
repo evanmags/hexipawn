@@ -4,13 +4,14 @@ import re
 import os
 import sqlite3
 from modules.game_state import GameState
-from modules.memory import memory
 
 def main(skipInit=False):
   game = init_game(skipInit)
   if game == None: return
   game.print_board()
   
+  connection = sqlite3.connect('hexipawn_memory.db')
+
   while not game.over("C"):
     # player moves
     game.player.move(game)
@@ -20,15 +21,15 @@ def main(skipInit=False):
     if game.over("P"): break
     
     #computer moves
-    game.computer.move(game)
+    game.computer.move(game, connection)
     game.print_board()
     print(("#" * 45) + "\n")
 
   print(f"The Winner is {game.winner}")
 
-  game.save_memory(sqlite3.connect('hexipawn_memory.db'))
+  game.save_memory(connection)
 
-  return check_replay()
+  if check_replay(): return main(True)
 
 def init_game(skip):
   if skip: return GameState()
@@ -60,9 +61,9 @@ def init_game(skip):
 
 def check_replay():
   if re.match("^(y|yes)$", input("Would you like to play again?"), flags=re.IGNORECASE):
-    return main(True)
-  else:
-    return print("thanks for playing!")
+    return True
+  print("thanks for playing!")
+  return False
 
 if __name__ == "__main__":
   main()

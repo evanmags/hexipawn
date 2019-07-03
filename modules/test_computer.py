@@ -1,5 +1,4 @@
 from modules.computer import Computer
-from modules.memory import memory
 from modules.game_state import Game_State
 
 

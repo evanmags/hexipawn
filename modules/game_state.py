@@ -1,6 +1,5 @@
 from modules.computer import Computer
 from modules.player import Player
-from modules.memory import memory
 
 class GameState:
   def __init__(self):
@@ -37,6 +36,7 @@ class GameState:
   def over(self, justPlayed):
     if not self.computer.has_moves(self) and not self.player.has_moves(self):
       self.winner = justPlayed
+      return True
 
     if self.player.crossed_board() or not self.computer.has_moves(self):
       self.winner = 'P'
@@ -44,6 +44,7 @@ class GameState:
     elif self.computer.crossed_board() or not self.player.has_moves(self):
       self.winner = 'C'
       return True
+      
     else: 
       return False
 
@@ -57,8 +58,6 @@ class GameState:
     for move, pPieces, cPieces in self.memory:
       variables.append((move[0], move[1], str(pPieces), str(cPieces), winLoss))
 
-    db.executemany('''INSERT INTO memory ("from", "to", "player_pieces", "computer_pieces", "game_result")
-                  VALUES (?, ?, ?, ?, ?)''', variables)
+    db.executemany('''INSERT INTO memory ("from", "to", "player_pieces", "computer_pieces", "game_result") VALUES (?, ?, ?, ?, ?)''', variables)
     
     connection.commit()
-    connection.close()

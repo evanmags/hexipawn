@@ -1,0 +1,8 @@
+*.db
+
+__pycache__
+.pytest_cache
+.vscode
+
+notes.txt
+rec_linear.py

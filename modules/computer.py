@@ -1,12 +1,11 @@
 from typing import List
 from random import choice
-from modules.memory import memory
 
 class Computer:
   def __init__(self):
     self.pieces = [0, 1, 2]
 
-  def move(self, state):
+  def move(self, state, connection):
     # generate all possible combinations
     all_moves = []
     for piece in self.pieces:
@@ -14,14 +13,20 @@ class Computer:
       for move in moves:
         all_moves.append([piece, move])
     
+    #query db for all moves that match the current board setup
+    db = connection.cursor()
+    db.execute("""SELECT "from", "to", "game_result"
+                  FROM memory 
+                  WHERE player_pieces = ? 
+                  AND computer_pieces = ?""",
+              (str(state.player.pieces), str(self.pieces)))
+
+    moves = db.fetchall()          
+
     # add add moves from memory to adjust weighting
-    if state.rnd in memory:
-      for move, score in memory[state.rnd]:
-        if move in all_moves:
-          i = score
-          while i > 0:
-            all_moves.append(move)
-            i -= 1
+    for piece, to, res in moves:
+      if res == 2:
+        all_moves.append([piece, to])
     
     # choose move from weighted list
     (at, to) = choice(all_moves)
